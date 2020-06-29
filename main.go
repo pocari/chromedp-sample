@@ -2,8 +2,7 @@ package main
 
 import (
 	"context"
-	"log"
-	"strings"
+	"fmt"
 
 	"github.com/chromedp/chromedp"
 )
@@ -30,21 +29,25 @@ func newChromedpContext(ctx context.Context, headless bool) (context.Context, co
 	}
 }
 
+type result struct {
+	Key1 string `json:"key1"`
+}
+
 func main() {
 	ctx, cancel := newChromedpContext(context.Background(), false)
 	defer cancel()
 
-	var res string
+	var dummyRes []byte
+	var res result
 	err := chromedp.Run(
 		ctx,
-		chromedp.Navigate("https://golang.org/pkg/time/"),
-		chromedp.Text("#pkg-overview", &res, chromedp.NodeVisible, chromedp.ByID),
+		chromedp.Navigate("https://google.co.jp"),
+		chromedp.Evaluate(`function hoge() { return { "key1": "value1" }; };`, &dummyRes),
+		chromedp.Evaluate(`hoge();`, &res),
 	)
 
+	fmt.Printf("res ... %+v\n", res)
 	if err != nil {
 		panic(err)
 	}
-
-	log.Println(strings.TrimSpace(res))
-
 }
